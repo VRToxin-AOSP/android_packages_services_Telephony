@@ -218,4 +218,8 @@
 
     <!-- Whether the emergency only account can make emergency calls -->
     <bool name="config_pstnCanPlaceEmergencyCalls">true</bool>
+
+    <!-- Flag whether to enable Proximity setting-->
+    <bool name="config_proximity_enable" translatable="false">false</bool>
+
 </resources>

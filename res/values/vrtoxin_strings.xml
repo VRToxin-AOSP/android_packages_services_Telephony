@@ -65,4 +65,10 @@
     <!-- Title for the option managing whether or not to use intrusive incall UI. -->
     <string name="use_intrusive_call_title">Intrusive Calls</string>
     <string name="use_intrusive_call_summary">Show a full screen notification on incoming call even when not on lockscreen</string>
+
+    <!-- Proximity sensor enable -->
+    <string name="proximity_mode_title">Enable proximity sensor</string>
+    <string name="proximity_on_summary">When in call, use proximity sensor to turn off screen</string>
+    <string name="proximity_off_summary">When in call, the screen will remain on</string>
+
 </resources>

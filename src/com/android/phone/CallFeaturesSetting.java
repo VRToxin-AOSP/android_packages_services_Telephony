@@ -112,6 +112,7 @@ public class CallFeaturesSetting extends PreferenceActivity
             "phone_account_settings_preference_screen";
 
     private static final String USE_INTRUSIVE_CALL_KEY = "use_intrusive_call";
+    private static final String BUTTON_PROXIMITY_KEY   = "button_proximity_key";
 
     private static final String ENABLE_VIDEO_CALLING_KEY = "button_enable_video_calling";
 
@@ -128,6 +129,7 @@ public class CallFeaturesSetting extends PreferenceActivity
     private PreferenceScreen mVoicemailSettingsScreen;
     private CheckBoxPreference mEnableVideoCalling;
     private PreferenceScreen mButtonBlacklist;
+    private SwitchPreference mButtonProximity;
 
     private ListPreference mFlipAction;
     private SwitchPreference mProxSpeaker;
@@ -154,6 +156,16 @@ public class CallFeaturesSetting extends PreferenceActivity
             Settings.System.putInt(getContentResolver(),
                     Settings.System.PROXIMITY_AUTO_SPEAKER_INCALL_ONLY,
                     mProxSpeakerIncallOnly.isChecked() ? 1 : 0);
+        } else if (preference == mButtonProximity) {
+            int checked = mButtonProximity.isChecked() ? 1 : 0;
+            Settings.System.putInt(mPhone.getContext().getContentResolver(),
+                    Settings.System.IN_CALL_PROXIMITY_SENSOR, checked);
+            if (checked == 1) {
+                mButtonProximity.setSummary(R.string.proximity_on_summary);
+            } else {
+                mButtonProximity.setSummary(R.string.proximity_off_summary);
+            }
+            return true;
         }
         return false;
     }
@@ -211,7 +223,6 @@ public class CallFeaturesSetting extends PreferenceActivity
             Settings.System.putInt(getContentResolver(),
                     Settings.System.USE_INTRUSIVE_CALL, val ? 1 : 0);
         }
-
         // Always let the preference setting proceed.
         return true;
     }
@@ -228,6 +239,8 @@ public class CallFeaturesSetting extends PreferenceActivity
         super.onCreate(icicle);
         if (DBG) log("onCreate: Intent is " + getIntent());
 
+        PreferenceScreen preferenceScreen = getPreferenceScreen();
+
         // Make sure we are running as the primary user.
         if (UserHandle.myUserId() != UserHandle.USER_OWNER) {
             Toast.makeText(this, R.string.call_settings_primary_user_only,
@@ -241,6 +254,15 @@ public class CallFeaturesSetting extends PreferenceActivity
                 getActionBar(), getResources(), R.string.call_settings_with_label);
         mPhone = mSubscriptionInfoHelper.getPhone();
         mTelecomManager = TelecomManager.from(this);
+
+        if (mButtonProximity != null) {
+            if (getResources().getBoolean(R.bool.config_proximity_enable)) {
+                mButtonProximity.setOnPreferenceChangeListener(this);
+            } else {
+                getPreferenceScreen().removePreference(mButtonProximity);
+                mButtonProximity = null;
+            }
+        }
     }
 
     @Override
@@ -295,6 +317,8 @@ public class CallFeaturesSetting extends PreferenceActivity
 
         PersistableBundle carrierConfig =
                 PhoneGlobals.getInstance().getCarrierConfigForSubId(mPhone.getSubId());
+
+        mButtonProximity = (SwitchPreference) findPreference(BUTTON_PROXIMITY_KEY);
 
         if (carrierConfig.getBoolean(CarrierConfigManager.KEY_AUTO_RETRY_ENABLED_BOOL)) {
             mButtonAutoRetry.setOnPreferenceChangeListener(this);
@@ -439,6 +463,14 @@ public class CallFeaturesSetting extends PreferenceActivity
                     Settings.System.CALL_FLIP_ACTION_KEY, 2);
             mFlipAction.setValue(String.valueOf(flipAction));
             updateFlipActionSummary(flipAction);
+        }
+
+        if (mButtonProximity != null) {
+            boolean checked = Settings.System.getInt(getContentResolver(),
+                    Settings.System.IN_CALL_PROXIMITY_SENSOR, 1) == 1;
+            mButtonProximity.setChecked(checked);
+            mButtonProximity.setSummary(checked ? R.string.proximity_on_summary
+                    : R.string.proximity_off_summary);
         }
     }
 
