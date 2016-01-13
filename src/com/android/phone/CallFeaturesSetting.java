@@ -27,7 +27,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
+import android.content.res.Resources;
+import android.content.res.Resources.NotFoundException;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.os.UserHandle;
@@ -116,6 +119,10 @@ public class CallFeaturesSetting extends PreferenceActivity
     private CheckBoxPreference mEnableVideoCalling;
     private PreferenceScreen mButtonBlacklist;
 
+    // Call recording format
+    private static final String CALL_RECORDING_FORMAT = "call_recording_format";
+    private ListPreference mCallRecordingFormat;
+
     /*
      * Click Listeners, handle click based on objects attached to UI.
      */
@@ -142,6 +149,9 @@ public class CallFeaturesSetting extends PreferenceActivity
      */
     @Override
     public boolean onPreferenceChange(Preference preference, Object objValue) {
+
+        ContentResolver cr = mPhone.getContext().getContentResolver();
+
         if (DBG) log("onPreferenceChange: \"" + preference + "\" changed to \"" + objValue + "\"");
 
         if (preference == mEnableVideoCalling) {
@@ -166,6 +176,11 @@ public class CallFeaturesSetting extends PreferenceActivity
                         .show();
                 return false;
             }
+        } else if (preference == mCallRecordingFormat) {
+            int value = Integer.valueOf((String) objValue);
+            int index = mCallRecordingFormat.findIndexOfValue((String) objValue);
+            Settings.System.putInt(cr, Settings.System.CALL_RECORDING_FORMAT, value);
+            mCallRecordingFormat.setSummary(mCallRecordingFormat.getEntries()[index]);
         }
 
         // Always let the preference setting proceed.
@@ -324,6 +339,20 @@ public class CallFeaturesSetting extends PreferenceActivity
             wifiCallingSettings.setSummary(resId);
         }
         updateBlacklistSummary();
+
+        // Call recording Format
+        mCallRecordingFormat = (ListPreference) findPreference(CALL_RECORDING_FORMAT);
+        if (mCallRecordingFormat != null) {
+            if (isCallRecordingEnabled()) {
+                int format = Settings.System.getInt(getContentResolver(),
+                        Settings.System.CALL_RECORDING_FORMAT, 0);
+                mCallRecordingFormat.setValue(String.valueOf(format));
+                mCallRecordingFormat.setSummary(mCallRecordingFormat.getEntry());
+                mCallRecordingFormat.setOnPreferenceChangeListener(this);
+            } else {
+                prefSet.removePreference(mCallRecordingFormat);
+            }
+        }
     }
 
     @Override
@@ -358,6 +387,24 @@ public class CallFeaturesSetting extends PreferenceActivity
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private boolean isCallRecordingEnabled() {
+        boolean recordingEnabled = false;
+        try {
+            PackageManager pm = getPackageManager();
+            String phonePackage = "com.android.dialer";
+            Resources res;
+            res = pm.getResourcesForApplication(phonePackage);
+            int booleanID =
+                    res.getIdentifier(phonePackage + ":bool/call_recording_enabled", null, null);
+            recordingEnabled = res.getBoolean(booleanID);
+        } catch (NameNotFoundException ex) {
+            ex.printStackTrace();
+        } catch (NotFoundException ex) {
+            ex.printStackTrace();
+        }
+        return recordingEnabled;
     }
 
     /**
