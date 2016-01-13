@@ -24,11 +24,6 @@
     <string name="blacklist_summary_disabled">Disabled</string>
     <string name="blacklist_summary">You will not receive incoming calls or messages from phone numbers on the blocked caller list</string>
 
-    <!-- Call recording format -->
-    <string name="call_recording_format">Call recording format</string>
-    <string name="wb_amr_format">WB AMR</string>
-    <string name="aac_format">AAC</string>
-
     <!-- Mobile network settings screen, setting check box name -->
     <string name="national_roaming">National data roaming</string>
     <!-- Mobile network settings screen, setting summary text when check box is selected -->
