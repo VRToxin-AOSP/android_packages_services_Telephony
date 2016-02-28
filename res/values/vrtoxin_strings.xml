@@ -62,4 +62,7 @@
     <string name="perm_change_mobile_network">change network mode (2G/3G)</string>
     <string name="perm_change_mobile_network_desc">Allows the app to change between 2G data and 3G data at any time. 3G is faster, but consumes more battery and may cause additional cost.</string>
 
+    <!-- Title for the option managing whether or not to use intrusive incall UI. -->
+    <string name="use_intrusive_call_title">Intrusive Calls</string>
+    <string name="use_intrusive_call_summary">Show a full screen notification on incoming call even when not on lockscreen</string>
 </resources>
