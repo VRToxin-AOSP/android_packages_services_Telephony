@@ -222,4 +222,7 @@
     <!-- Flag whether to enable Proximity setting-->
     <bool name="config_proximity_enable" translatable="false">false</bool>
 
+    <!-- Whether the voicemail number is editable or not -->
+    <bool name="config_edit_voicemail_number_bool">true</bool>
+
 </resources>
